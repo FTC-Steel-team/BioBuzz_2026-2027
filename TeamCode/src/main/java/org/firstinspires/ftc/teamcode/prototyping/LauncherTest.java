@@ -13,12 +13,15 @@ public class LauncherTest extends OpMode {
 
     // Assigning important things that we will use
     final double STOP_SPEED = 0.0; // Making a stop speed for the launchers also makes the code easier to read
-    double velocity = 1000; // Making the initial velocity that the user will later change
+    double towards_goal_launcher_velocity = 1000; // Making the initial velocity that the user will later change
+    double away_from_goal_launcher_velocity = 1000; // Making the initial velocity that the user will later change
     LauncherType launcher_type = LauncherType.SINGLE; // Creating the state machine for our Launcher Type
 
     DcMotorEx towards_goal_launcher = hardwareMap.get(DcMotorEx.class, "towards_goal_launcher"); // Creating the towards goal launcher
     DcMotorEx away_from_goal_launcher = hardwareMap.get(DcMotorEx.class, "away_from_goal_launcher"); // Creating the away from goal launcher
+
     DcMotorEx running_motor = towards_goal_launcher; // Setting the running motor for when the state is set to SINGLE
+    double running_motor_velocity = 1000; // Setting the running motor's initial velocity
 
 
     @Override
@@ -60,45 +63,59 @@ public class LauncherTest extends OpMode {
 
                 // Changes which launcher is running based of user input
                 if (gamepad1.left_bumper) {
-                    running_motor = towards_goal_launcher;
+                    running_motor = towards_goal_launcher; // Sets the running motor to the towards goal launcher
+                    running_motor_velocity = towards_goal_launcher_velocity; // This is for telemetry and updating the velocities
                 } else if (gamepad1.right_bumper) {
-                    running_motor = away_from_goal_launcher;
+                    running_motor = away_from_goal_launcher; // Sets the running motor to the away from goal launcher
+                    running_motor_velocity = away_from_goal_launcher_velocity; // This is for telemetry of the current running launcher
                 }
 
                 // Changes from SINGLE to DUAL if the user wants to try both launchers
-                if(gamepad1.y){
+                if (gamepad1.y) {
                     launcher_type = LauncherType.DUAL;
                 }
 
-                // Updates the velocity that the launchers are running at based on user input
-                if(gamepad1.x){
-                    velocity++;
+                // Updates the velocity that the launcher is running at based on user input
+                if (gamepad1.x) {
+                    running_motor_velocity++;
                 }
 
-                if(gamepad1.b){
-                    velocity--;
+                if (gamepad1.b) {
+                    running_motor_velocity--;
                 }
 
                 // Updates the launcher's velocity with the new velocity (NOTE: the velocity may stay the same it doesn't have to change)
-                running_motor.setVelocity(velocity);
+                running_motor.setVelocity(running_motor_velocity);
 
                 // Making sure that the motor the user wants to test is the only one that is running
-                if(running_motor == away_from_goal_launcher){
+                if (running_motor == away_from_goal_launcher) {
+                    away_from_goal_launcher_velocity = running_motor_velocity; // Making the actual motor's velocity equal to the running motor
                     towards_goal_launcher.setVelocity(STOP_SPEED);
-                } else {
+                } else if (running_motor == towards_goal_launcher) {
+                    towards_goal_launcher_velocity = running_motor_velocity; // Making the actual motor's velocity equal to the running motor
                     away_from_goal_launcher.setVelocity(STOP_SPEED);
                 }
 
 
 
                 // Giving the user all the information about the robot and the launchers right now
-                telemetry.addData("Mode", "SINGLE (you can switch the launcher with LB and RB)");
+                telemetry.addData("Mode", "SINGLE (you can switch the launcher with LB and RB, x to increase velocity b to decrease velocity)");
                 telemetry.addData("Current Launcher", running_motor.getDeviceName());
-                telemetry.addData("Current Velocity", velocity);
+                telemetry.addData("Current Velocity For Launcher", running_motor.getVelocity());
+                telemetry.addData("Target Velocity For Launcher", running_motor_velocity);
                 telemetry.update();
 
             // Code to run if both launchers are running
             case DUAL:
+
+                // Changing the velocity based on user input
+                if (gamepad1.left_bumper) {
+                    running_motor = towards_goal_launcher; // Sets the running motor to the towards goal launcher
+                    running_motor_velocity = towards_goal_launcher_velocity; // This is for telemetry and updating the velocities
+                } else if (gamepad1.right_bumper) {
+                    running_motor = away_from_goal_launcher; // Sets the running motor to the away from goal launcher
+                    running_motor_velocity = away_from_goal_launcher_velocity; // This is for telemetry of the current running launcher
+                }
 
                 // Changes from DUAL to SINGLE if the user wants to try only one launcher
                 if(gamepad1.y){
@@ -107,20 +124,30 @@ public class LauncherTest extends OpMode {
 
                 // Updates the velocity that the launchers are running at based on user input
                 if(gamepad1.x){
-                    velocity++;
+                    running_motor_velocity++;
                 }
 
                 if(gamepad1.b){
-                    velocity--;
+                    running_motor_velocity--;
                 }
 
+                if(running_motor == away_from_goal_launcher){
+                    away_from_goal_launcher_velocity = running_motor_velocity;
+                } else if(running_motor == towards_goal_launcher){
+                    towards_goal_launcher_velocity = running_motor_velocity;
+                }
+
+
                 // Updates both launchers velocities with the new velocity (NOTE: the velocity may stay the same it doesn't have to change)
-                towards_goal_launcher.setVelocity(velocity);
-                away_from_goal_launcher.setVelocity(velocity);
+                towards_goal_launcher.setVelocity(towards_goal_launcher_velocity);
+                away_from_goal_launcher.setVelocity(away_from_goal_launcher_velocity);
 
                 // Giving the user all the information about the robot and the launchers right now
                 telemetry.addData("Mode", "DUAL (Both launchers should be running)");
-                telemetry.addData("Current Velocity", velocity);
+                telemetry.addData("Current Velocity For Towards Goal Launcher", towards_goal_launcher.getVelocity());
+                telemetry.addData("Target Velocity For Towards Goal Launcher", towards_goal_launcher_velocity);
+                telemetry.addData("Current Velocity For Away From Goal Launcher", away_from_goal_launcher.getVelocity());
+                telemetry.addData("Target Velocity For Away From Goal Launcher", away_from_goal_launcher_velocity);
                 telemetry.update();
 
         }
