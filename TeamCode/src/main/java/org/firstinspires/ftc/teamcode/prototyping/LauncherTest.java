@@ -17,15 +17,21 @@ public class LauncherTest extends OpMode {
     double away_from_goal_launcher_velocity = 1000; // Making the initial velocity that the user will later change
     LauncherType launcher_type = LauncherType.SINGLE; // Creating the state machine for our Launcher Type
 
-    DcMotorEx towards_goal_launcher = hardwareMap.get(DcMotorEx.class, "towards_goal_launcher"); // Creating the towards goal launcher
-    DcMotorEx away_from_goal_launcher = hardwareMap.get(DcMotorEx.class, "away_from_goal_launcher"); // Creating the away from goal launcher
+    DcMotorEx towards_goal_launcher;
+    DcMotorEx away_from_goal_launcher;
+    DcMotorEx running_motor;
+    double running_motor_velocity;
 
-    DcMotorEx running_motor = towards_goal_launcher; // Setting the running motor for when the state is set to SINGLE
-    double running_motor_velocity = 1000; // Setting the running motor's initial velocity
 
 
     @Override
     public void init(){
+
+        DcMotorEx towards_goal_launcher = hardwareMap.get(DcMotorEx.class, "towards_goal_launcher"); // Creating the towards goal launcher
+        DcMotorEx away_from_goal_launcher = hardwareMap.get(DcMotorEx.class, "away_from_goal_launcher"); // Creating the away from goal launcher
+
+        DcMotorEx running_motor = towards_goal_launcher; // Setting the running motor for when the state is set to SINGLE
+        double running_motor_velocity = 1000; // Setting the running motor's initial velocity
 
         // Ensures that when the robot starts the launchers are not already running
         towards_goal_launcher.setVelocity(STOP_SPEED);
@@ -84,6 +90,10 @@ public class LauncherTest extends OpMode {
                     running_motor_velocity--;
                 }
 
+                if (gamepad1.a) {
+                    running_motor_velocity += 10;
+                }
+
                 // Updates the launcher's velocity with the new velocity (NOTE: the velocity may stay the same it doesn't have to change)
                 running_motor.setVelocity(running_motor_velocity);
 
@@ -131,6 +141,11 @@ public class LauncherTest extends OpMode {
                     running_motor_velocity--;
                 }
 
+                if (gamepad1.a) {
+                    running_motor_velocity += 10;
+                }
+
+                // Making sure that the individual velocities are being affected/changed by the running velocity
                 if(running_motor == away_from_goal_launcher){
                     away_from_goal_launcher_velocity = running_motor_velocity;
                 } else if(running_motor == towards_goal_launcher){
