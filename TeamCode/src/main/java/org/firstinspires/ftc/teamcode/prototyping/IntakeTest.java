@@ -147,8 +147,8 @@ public class IntakeTest extends OpMode {
     public void stop(){
 
         // Ensuring that when the robot stops the launchers are not still running
-        towards_goal_launcher.setVelocity(STOP_SPEED);
-        away_from_goal_launcher.setVelocity(STOP_SPEED);
+        Intake_a.setVelocity(Stop_speed);
+        Intake_b.setVelocity(Stop_speed);
 
     }
 }
