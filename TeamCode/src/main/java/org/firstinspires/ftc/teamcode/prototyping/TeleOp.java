@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode.prototyping;
 
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -14,9 +13,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 
-@TeleOp(name = "Main TeleOp")
-public class MainTeleOp extends OpMode {
-
+@com.qualcomm.robotcore.eventloop.opmode.TeleOp(name = "TeleOp")
+public class TeleOp extends OpMode {
     static final boolean USE_BLOCKER = false;
     static final double SLOW_MODE = 0.4;
     static final double INTAKE_POWER = 1.0;
@@ -28,7 +26,9 @@ public class MainTeleOp extends OpMode {
     static final double BLOCKER_OPEN = 0.5;
     static final double FEED_TIME_SECONDS = 0.4;
     static final int MAX_QUEUED_SHOTS = 3;
-    enum LaunchState { IDLE, SPIN_UP, FEEDING }
+
+    enum LaunchState {IDLE, SPIN_UP, FEEDING}
+
     DcMotor leftFront, rightFront, leftBack, rightBack, leftIntake, rightIntake;
     DcMotorEx leftFlywheel, rightFlywheel;
     CRServo leftFeeder, rightFeeder;
@@ -38,6 +38,7 @@ public class MainTeleOp extends OpMode {
     LaunchState launchState = LaunchState.IDLE;
     int shotsQueued = 0;
     ElapsedTime feedTimer = new ElapsedTime();
+
     @Override
     public void init() {
         leftFront = hardwareMap.get(DcMotor.class, "left_front_drive");
@@ -125,6 +126,7 @@ public class MainTeleOp extends OpMode {
         telemetry.update();
 
     }
+
     @Override
     public void stop() {
         leftFront.setPower(0);
@@ -133,18 +135,50 @@ public class MainTeleOp extends OpMode {
         rightBack.setPower(0);
         leftIntake.setPower(0);
         rightIntake.setPower(0);
-        leftFlywheel.setPower(0);
-        rightFlywheel.setPower(0);
+        leftFlywheel.setVelocity(0);
+        rightFlywheel.setVelocity(0);
         feed(false);
-
-
-
     }
 
-
-
-
+    void launch() {
+        switch (launchState) {
+            case IDLE:
+                if (shotsQueued > 0) {
+                    if (targetVelocity == 0) targetVelocity = LAUNCH_VELOCITY;
+                    launchState = LaunchState.SPIN_UP;
+                }
+                break;
+            case SPIN_UP:
+                double minVelocity = targetVelocity - VELOCITY_TOLERANCE;
+                if (shotsQueued == 0) {
+                    launchState = LaunchState.IDLE;
+                } else if (leftFlywheel.getVelocity() >= minVelocity && rightFlywheel.getVelocity() >= minVelocity) {
+                    feed(true);
+                    feedTimer.reset();
+                    launchState = LaunchState.FEEDING;
+                }
+                break;
+            case FEEDING:
+                if (feedTimer.seconds() > FEED_TIME_SECONDS) {
+                    feed(false);
+                    shotsQueued--;
+                    launchState = LaunchState.IDLE;
+                }
+                break;
+        }
     }
+
+    void feed(boolean on) {
+        if (USE_BLOCKER) {
+            blocker.setPosition(on ? BLOCKER_OPEN : BLOCKER_CLOSED);
+        } else {
+            leftFeeder.setPower(on ? FEEDER_POWER : 0);
+            rightFeeder.setPower(on ? FEEDER_POWER : 0);
+        }
+    }
+}
+
+
 
 
 
