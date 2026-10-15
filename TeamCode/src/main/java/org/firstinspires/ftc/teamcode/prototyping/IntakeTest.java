@@ -47,7 +47,7 @@ public class IntakeTest extends OpMode {
         }
 
         // Letting the user know either what type of launcher they have chosen or letting them know that they have not chosen one yet
-        telemetry.addData("Chosen launcher type", Intake_mode);
+        telemetry.addData("Chosen Intake Mode", Intake_mode);
         telemetry.update();
     }
 
@@ -84,8 +84,8 @@ public class IntakeTest extends OpMode {
                 // Giving the user all the information about the robot and the launchers right now
                 telemetry.addData("Mode", "IN (x to increase velocity, b to decrease velocity)");
                 telemetry.addData("Current Mode", Intake_mode);
-                telemetry.addData("Current Velocity For Launcher", Intake_a.getVelocity());
-                telemetry.addData("Target Velocity For Launcher", intake_speed);
+                telemetry.addData("Current Velocity For Intake", Intake_a.getVelocity());
+                telemetry.addData("Target Velocity For Intake", intake_speed);
                 telemetry.update();
 
                 //Code if Outtaking
@@ -146,7 +146,7 @@ public class IntakeTest extends OpMode {
     @Override
     public void stop(){
 
-        // Ensuring that when the robot stops the launchers are not still running
+        // Ensuring that when the robot stops the intake isn't running
         Intake_a.setVelocity(Stop_speed);
         Intake_b.setVelocity(Stop_speed);
 
