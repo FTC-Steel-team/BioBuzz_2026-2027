@@ -5,21 +5,24 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 
 public class IntakeTest extends OpMode {
 
-    // Creating the enum that will be used to see what direction the intake should be moving
-    private enum IntakeMode{
+    private enum intake_state{
         In,
         Out,
+        OnlyA,
+        OnlyB,
         Off
     }
 
-    // Assigning important things that we will use
-    final double Stop_speed = 0.0; // Making a stop speed for the launchers also makes the code easier to read
-    double intake_speed = 1000; // Making the initial velocity that the user will later change
-    double outtake_speed = -1000; // Making the initial velocity that the user will later change
-    IntakeMode Intake_mode = IntakeMode.Off; // Creating the state machine for our intake mode
+    final double Stop_speed = 0.0;
 
-    DcMotorEx Intake_a;
-    DcMotorEx Intake_b;
+    double intake_speed = 700;
+
+    double outtake_speed = -700;
+
+    intake_state intakeState = intake_state.Off;
+
+    DcMotorEx intake_a;
+    DcMotorEx intake_b;
 
     @Override
     public void init(){
@@ -29,126 +32,154 @@ public class IntakeTest extends OpMode {
 
         Intake_a.setVelocity(Stop_speed);
         Intake_b.setVelocity(Stop_speed);
-
     }
 
     @Override
-    public void init_loop(){
+    public void init_loop() {
 
         // Letting the user know that we are waiting for the Intake Mode
-        telemetry.addData("Choose Intake Mode", "x for In, b for Out");
+        telemetry.addData("Choose Intake Mode: ","X - In, B - Out");
 
         // Checking User Input
-        if(gamepad1.x){ // <-- This checks if x has been pressed
-            Intake_mode = IntakeMode.In; // Assigns the Mode as In
+        if (gamepad1.x) { // <-- This checks if x has been pressed
+            intakeState = intake_state.In; // Assigns the Mode as In
         }
-        if(gamepad1.b){ // <-- This checks if b has been pressed.
-            Intake_mode = IntakeMode.Out; // Assigns the Mode as Out
+        if (gamepad1.b) { // <-- This checks if b has been pressed.
+            intakeState = intake_state.Out; // Assigns the Mode as Out
         }
 
         // Letting the user know either what type of launcher they have chosen or letting them know that they have not chosen one yet
-        telemetry.addData("Chosen Intake Mode", Intake_mode);
+        telemetry.addData("Chosen Intake Mode", intakeState);
         telemetry.update();
     }
 
     @Override
     public void loop(){
 
-        switch(Intake_mode) {
-
-            // Code if Intaking
+        switch(intakeState) {
             case In:
 
-                // Changes to Outtake
-                if (gamepad1.y) {
-                    Intake_mode = IntakeMode.Out;
+                //changes intake motor B to Out
+                if (gamepad1.left_bumper){
+                    intakeState = intake_state.OnlyA;
                 }
 
-                // Updates the velocity that the Intake is moving
-                if (gamepad1.x) {
-                    intake_speed ++;
+                //changes intake motor A to Out
+                if (gamepad1.right_bumper){
+                    intakeState = intake_state.OnlyB;
                 }
 
-                if (gamepad1.b) {
-                    intake_speed --;
+                //changes intake to Off
+                if (gamepad1.a){
+                    intakeState = intake_state.Off;
                 }
 
-                if (gamepad1.a) {
-                    Intake_mode = IntakeMode.Off;
+                //changes intake to Out
+                if (gamepad1.b){
+                    intakeState = intake_state.Out;
                 }
 
-                //sets intakes to the current speed
-                Intake_a.setVelocity(intake_speed);
-                Intake_b.setVelocity(intake_speed);
 
-                // Giving the user all the information about the robot and the launchers right now
-                telemetry.addData("Mode", "IN (x to increase velocity, b to decrease velocity)");
-                telemetry.addData("Current Mode", Intake_mode);
-                telemetry.addData("Current Velocity For Intake", Intake_a.getVelocity());
-                telemetry.addData("Target Velocity For Intake", intake_speed);
-                telemetry.update();
+                //Sets motors
+                intake_a.setVelocity(intake_speed);
+                intake_b.setVelocity(intake_speed);
 
-                //Code if Outtaking
             case Out:
 
-                // Changes to Intake
-                if (gamepad1.y) {
-                    Intake_mode = IntakeMode.In;
+                //changes intake motor A to in
+                if (gamepad1.left_bumper){
+                    intakeState = intake_state.OnlyA;
                 }
 
-                // Updates the velocity that the Intake is moving
-                if (gamepad1.x) {
-                    outtake_speed ++;
+                //changes intake motor B to in
+                if (gamepad1.right_bumper){
+                    intakeState = intake_state.OnlyB;
                 }
 
-                if (gamepad1.b) {
-                    outtake_speed --;
+                //changes intake to Off
+                if (gamepad1.a){
+                    intakeState = intake_state.Off;
                 }
 
-                if (gamepad1.a) {
-                    Intake_mode = IntakeMode.Off;
+                //changes intake to In
+                if (gamepad1.b){
+                    intakeState = intake_state.In;
                 }
 
-                //sets intakes to the current speed
-                Intake_a.setVelocity(outtake_speed);
-                Intake_b.setVelocity(outtake_speed);
 
-                // Giving the user all the information about the robot and the launchers right now
-                telemetry.addData("Mode", "OUT (x to increase velocity, b to decrease velocity)");
-                telemetry.addData("Current Mode", Intake_mode);
-                telemetry.addData("Current Velocity For Intake", Intake_a.getVelocity());
-                telemetry.addData("Target Velocity For Intake", outtake_speed);
-                telemetry.update();
+                //Sets motors
+                intake_a.setVelocity(outtake_speed);
+                intake_b.setVelocity(outtake_speed);
 
-            //code when off
+            case OnlyA:
+
+                //changes intake motor B to In
+                if (gamepad1.left_bumper){
+                    intakeState = intake_state.In;
+                }
+
+                //changes intake motor A to Out
+                if (gamepad1.right_bumper){
+                    intakeState = intake_state.Out;
+                }
+
+                //changes intake to Off
+                if (gamepad1.a){
+                    intakeState = intake_state.Off;
+                }
+
+                //changes intake to Only B In
+                if (gamepad1.b){
+                    intakeState = intake_state.OnlyB;
+                }
+
+
+                //Sets motors
+                intake_a.setVelocity(intake_speed);
+                intake_b.setVelocity(outtake_speed);
+
+            case OnlyB:
+
+                //changes intake motor B to Out
+                if (gamepad1.left_bumper){
+                    intakeState = intake_state.Out;
+                }
+
+                //changes intake motor A to In
+                if (gamepad1.right_bumper){
+                    intakeState = intake_state.In;
+                }
+
+                //changes intake to Off
+                if (gamepad1.a){
+                    intakeState = intake_state.Off;
+                }
+
+                //changes intake to Out
+                if (gamepad1.b){
+                    intakeState = intake_state.OnlyA;
+                }
+
+
+                //Sets motors
+                intake_a.setVelocity(outtake_speed);
+                intake_b.setVelocity(intake_speed);
+
             case Off:
 
-                Intake_a.setVelocity(Stop_speed);
-                Intake_b.setVelocity(Stop_speed);
-
-                if (gamepad1.a) {
-                    Intake_mode = IntakeMode.In;
+                // Checking User Input
+                if (gamepad1.x) { // <-- This checks if x has been pressed
+                    intakeState = intake_state.In; // Assigns the Mode as In
                 }
-
-                if (gamepad1.b) {
-                    Intake_mode = IntakeMode.Out;
+                if (gamepad1.b) { // <-- This checks if b has been pressed.
+                    intakeState = intake_state.Out; // Assigns the Mode as Out
                 }
-
-                // Giving the user all the information about the robot and the launchers right now
-                telemetry.addData("Mode", "Off (A for IN, B for OUT)");
-                telemetry.addData("Current Mode", Intake_mode);
-                telemetry.addData("Current Velocity For Intake", Intake_a.getVelocity());
-                telemetry.addData("Target Velocity For Intake", Stop_speed);
-                telemetry.update();
+                telemetry.addData("Choose Intake Mode: ","X - In, B - Out");
         }
-    }
 
-    @Override
-    public void stop(){
-
-        // Ensuring that when the robot stops the intake isn't running
-        Intake_a.setVelocity(Stop_speed);
-        Intake_b.setVelocity(Stop_speed);
-
+        telemetry.addData("Mode:", intakeState);
+        telemetry.addData("Intake Speed:", intake_speed);
+        telemetry.addData("Outtake Speed:", outtake_speed);
+        telemetry.update();
     }
 }
