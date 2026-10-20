@@ -1,8 +1,11 @@
 package org.firstinspires.ftc.teamcode.prototyping;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
+@TeleOp(name = "launcherTest")
 public class LauncherTest extends OpMode {
 
     // Creating the enum that will be used to see what code should run based on what launchers the user wants to test
@@ -13,8 +16,8 @@ public class LauncherTest extends OpMode {
 
     // Assigning important things that we will use
     final double STOP_SPEED = 0.0; // Making a stop speed for the launchers also makes the code easier to read
-    double towards_goal_launcher_velocity = 1000; // Making the initial velocity that the user will later change
-    double away_from_goal_launcher_velocity = 1000; // Making the initial velocity that the user will later change
+    double towards_goal_launcher_velocity = 100; // Making the initial velocity that the user will later change
+    double away_from_goal_launcher_velocity = 100; // Making the initial velocity that the user will later change
     LauncherType launcher_type = LauncherType.SINGLE; // Creating the state machine for our Launcher Type
 
     DcMotorEx towards_goal_launcher;
@@ -27,11 +30,13 @@ public class LauncherTest extends OpMode {
     @Override
     public void init(){
 
-        DcMotorEx towards_goal_launcher = hardwareMap.get(DcMotorEx.class, "towards_goal_launcher"); // Creating the towards goal launcher
-        DcMotorEx away_from_goal_launcher = hardwareMap.get(DcMotorEx.class, "away_from_goal_launcher"); // Creating the away from goal launcher
+        towards_goal_launcher = hardwareMap.get(DcMotorEx.class, "towards_goal_launcher"); // Creating the towards goal launcher
+        away_from_goal_launcher = hardwareMap.get(DcMotorEx.class, "away_from_goal_launcher"); // Creating the away from goal launcher
 
-        DcMotorEx running_motor = towards_goal_launcher; // Setting the running motor for when the state is set to SINGLE
-        double running_motor_velocity = 1000; // Setting the running motor's initial velocity
+        away_from_goal_launcher.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        running_motor = towards_goal_launcher; // Setting the running motor for when the state is set to SINGLE
+        running_motor_velocity = 100; // Setting the running motor's initial velocity
 
         // Ensures that when the robot starts the launchers are not already running
         towards_goal_launcher.setVelocity(STOP_SPEED);
@@ -54,8 +59,23 @@ public class LauncherTest extends OpMode {
             launcher_type = LauncherType.DUAL; // Assigns the type as DUAL meaning both launchers will be running
         }
 
+        if(gamepad1.dpad_up) {
+            running_motor_velocity += 10;
+            towards_goal_launcher_velocity += 10;
+            away_from_goal_launcher_velocity += 10;
+        }
+
+        if (gamepad1.dpad_down) {
+            running_motor_velocity -= 10;
+            towards_goal_launcher_velocity -= 10;
+            away_from_goal_launcher_velocity -= 10;
+        }
+
         // Letting the user know either what type of launcher they have chosen or letting them know that they have not chosen one yet
         telemetry.addData("Chosen launcher type", launcher_type);
+        telemetry.addData("Target Velocity", running_motor_velocity);
+        telemetry.addData("Target Velocity", towards_goal_launcher_velocity);
+        telemetry.addData("Target Velocity", away_from_goal_launcher_velocity);
         telemetry.update();
     }
 
@@ -90,8 +110,12 @@ public class LauncherTest extends OpMode {
                     running_motor_velocity--;
                 }
 
-                if (gamepad1.a) {
+                if (gamepad1.dpad_up) {
                     running_motor_velocity += 10;
+                }
+
+                if (gamepad1.dpad_down) {
+                    running_motor_velocity -= 10;
                 }
 
                 // Updates the launcher's velocity with the new velocity (NOTE: the velocity may stay the same it doesn't have to change)
@@ -114,6 +138,8 @@ public class LauncherTest extends OpMode {
                 telemetry.addData("Current Velocity For Launcher", running_motor.getVelocity());
                 telemetry.addData("Target Velocity For Launcher", running_motor_velocity);
                 telemetry.update();
+
+                break;
 
             // Code to run if both launchers are running
             case DUAL:
@@ -141,8 +167,12 @@ public class LauncherTest extends OpMode {
                     running_motor_velocity--;
                 }
 
-                if (gamepad1.a) {
+                if (gamepad1.dpad_up) {
                     running_motor_velocity += 10;
+                }
+
+                if (gamepad1.dpad_down) {
+                    running_motor_velocity -= 10;
                 }
 
                 // Making sure that the individual velocities are being affected/changed by the running velocity
@@ -164,6 +194,8 @@ public class LauncherTest extends OpMode {
                 telemetry.addData("Current Velocity For Away From Goal Launcher", away_from_goal_launcher.getVelocity());
                 telemetry.addData("Target Velocity For Away From Goal Launcher", away_from_goal_launcher_velocity);
                 telemetry.update();
+
+                break;
 
         }
     }
