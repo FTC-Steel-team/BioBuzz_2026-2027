@@ -26,6 +26,7 @@ public class launcher{
         flywheel_b = hardwareMap.get(DcMotorEx.class, "flywheel_b");
         feeder = hardwareMap.get(Servo.class, "feeder");
         hood = hardwareMap.get(Servo.class, "hood");
+        hood.scaleRange(0,90); //sets range for hood servo
 
         //sets flywheels to off
         flywheel_a.setVelocity(0);
@@ -65,5 +66,13 @@ public class launcher{
     public void queue_shot(){ //adds to queue
 
         queue ++;
+    }
+
+    public void set_hood(int angle){
+        hood.setPosition(angle);
+    }
+
+    public void change_hood(int angle){
+        hood.setPosition(hood.getPosition()+angle);
     }
 }
