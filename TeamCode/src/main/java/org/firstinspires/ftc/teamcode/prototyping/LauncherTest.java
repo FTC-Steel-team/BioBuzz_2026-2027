@@ -15,15 +15,15 @@ public class LauncherTest extends OpMode {
     }
 
     // Assigning important things that we will use
-    final double STOP_SPEED = 0.0; // Making a stop speed for the launchers also makes the code easier to read
-    double towards_goal_launcher_velocity = 100; // Making the initial velocity that the user will later change
-    double away_from_goal_launcher_velocity = 100; // Making the initial velocity that the user will later change
+    private final double STOP_SPEED = 0.0; // Making a stop speed for the launchers also makes the code easier to read
+    public double towards_goal_launcher_velocity = 100; // Making the initial velocity that the user will later change
+    public double away_from_goal_launcher_velocity = 100; // Making the initial velocity that the user will later change
     LauncherType launcher_type = LauncherType.SINGLE; // Creating the state machine for our Launcher Type
 
-    DcMotorEx towards_goal_launcher;
-    DcMotorEx away_from_goal_launcher;
-    DcMotorEx running_motor;
-    double running_motor_velocity;
+    public DcMotorEx towards_goal_launcher;
+    public DcMotorEx away_from_goal_launcher;
+    public DcMotorEx running_motor;
+    public double running_motor_velocity;
 
 
 
