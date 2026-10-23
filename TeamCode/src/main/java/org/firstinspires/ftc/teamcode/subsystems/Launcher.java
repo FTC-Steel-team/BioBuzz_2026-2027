@@ -117,4 +117,7 @@ public class Launcher{
     public void changeAngle(int angle){ // changes hood angle by angle
         hood.setPosition(hood.getPosition()+angle);
     }
+
+    public void setTargetVel(int targetVel){ //sets target velocity
+        this.targetVel = targetVel;}
 }
