@@ -59,7 +59,7 @@ public class Launcher{
         launchState = LaunchStates.IDLE;
     }
 
-    public int speed_per(){ //returns current speed vs target speed as a %
+    public int speedPer(){ //returns current speed vs target speed as a %
 
         double current = flywheel_b.getVelocity() + flywheel_a.getVelocity();
         return (int) ((current/(targetVel *2))*100);
@@ -104,24 +104,17 @@ public class Launcher{
                 break;
         }
 
-        /*
-        if (queue > 1){
-            feeder.setPower(1);// Needs testing for good power values
-            queue --;
-        }
-         */
-
     }
 
-    public void queueShot(){ //adds to queue
+    public void queueShot(){ // adds to queue
         shotsQueued++;
     }
 
-    public void setAngle(int angle){
+    public void setAngle(int angle){ // sets hood angle to angle
         hood.setPosition(angle);
     }
 
-    public void changeAngle(int angle){
+    public void changeAngle(int angle){ // changes hood angle by angle
         hood.setPosition(hood.getPosition()+angle);
     }
 }
