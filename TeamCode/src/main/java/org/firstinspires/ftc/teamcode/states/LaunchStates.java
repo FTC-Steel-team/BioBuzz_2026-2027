@@ -2,9 +2,8 @@ package org.firstinspires.ftc.teamcode.states;
 
 public enum LaunchStates {
     IDLE,
-    SPININGUP,
-    SPUNUP,
-    LAUNCHING,
-    FROTHING,
-    SAFE
+    SPINING_UP,
+    SPUN_UP,
+    LAUNCH,
+    LAUNCHING
 }
