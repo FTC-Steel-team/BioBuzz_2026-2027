@@ -7,7 +7,7 @@ import org.firstinspires.ftc.teamcode.states.IntakeStates;
 public class Intake {
 
     DcMotorEx intake;
-    IntakeStates intakeStates;
+    IntakeStates intakeState; //I changed the name here from plural to singular for clarity
     double intakeVel;
     double outtakeVel;
     final double STOP_SPEED = 0;
@@ -16,24 +16,25 @@ public class Intake {
 
         this.intake = intake;
         intake.setVelocity(STOP_SPEED);
-        intakeStates = IntakeStates.IDLE;
+        intakeState = IntakeStates.IDLE;
 
         this.intakeVel = 700;
         this.outtakeVel = -700;
     }
 
-    public void In(){
-        intakeStates = IntakeStates.INTAKING;
+    public void In(){ // Remember: functions are camelCase,
+        intakeState = IntakeStates.INTAKING;
     }
 
     public void Out(){
-        intakeStates = IntakeStates.OUTTAKING;
+        intakeState = IntakeStates.OUTTAKING;
     }
 
     public void Run(boolean in, boolean out){
-        switch (intakeStates) {
+        // you could use .setPower() instead of .setVelocity(), because this doesn't require fine-tuned adjustable control
+        switch (intakeState) {
             case INTAKING:
-                intake.setVelocity(intakeVel);
+                intake.setVelocity(intakeVel); //unlike the launcher, the intake and outtake speeds probably don't need to change.
             case IDLE:
                 intake.setVelocity(STOP_SPEED);
             case OUTTAKING:
