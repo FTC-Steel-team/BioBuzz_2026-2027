@@ -15,6 +15,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 
 @com.qualcomm.robotcore.eventloop.opmode.TeleOp(name = "TeleOp")
 public class TeleOp extends OpMode {
+    //Dictates weather the system uses a blocker servo or dual feeders
+    // Temp
     static final boolean USE_BLOCKER = false;
     static final double SLOW_MODE = 0.4;
     static final double INTAKE_POWER = 1.0;
@@ -86,35 +88,56 @@ public class TeleOp extends OpMode {
 
     @Override
     public void loop() {
+        // The power to drive forward (positive is forward)
         double y = -gamepad1.left_stick_y;
+        // the strafing side to side (positive is right)
         double x = gamepad1.left_stick_x;
+        // The turning speed (positive is clockwise)
         double rx = gamepad1.right_stick_x;
+        // A coeficent  used to slow the robot for more precise control
         double scale = gamepad1.left_bumper ? SLOW_MODE : 1.0;
+        // the highest movement value, scales all the movement to ensure the robot is going as fast as possible
+        // based on the driver feedback we should probably remove this
         double denom = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
 
+        // sets each of the motor powers using:
+        // (the basic mecanum kinematics) / the largest movement value * the movement scale
+        // Temp, should be exported to a seperate class
         leftFront.setPower((y + x + rx) / denom * scale);
         leftBack.setPower((y - x + rx) / denom * scale);
         rightFront.setPower((y - x - rx) / denom * scale);
         rightBack.setPower((y + x - rx) / denom * scale);
 
+        // stores the speed at which to intake
         double intake = (gamepad2.right_trigger - gamepad2.left_trigger) * INTAKE_POWER;
 
+        // uses the previous power to set the acctual motor speed
         leftIntake.setPower(intake);
         rightIntake.setPower(intake);
 
+        // sets the value of the launchers target velocity (potential conflict here, close velocity overides far velocity)
         if (gamepad2.y) targetVelocity = LAUNCH_VELOCITY;
         if (gamepad2.x) targetVelocity = CLOSE_VELOCITY;
+        // Completely stops the launchers
         if (gamepad2.b) {
             targetVelocity = 0;
             shotsQueued = 0;
         }
+        // adds shots to the queue, so that when launching, it can fire mutiple in automatic sucessions
         if (gamepad2.rightBumperWasPressed() && shotsQueued < MAX_QUEUED_SHOTS) shotsQueued++;
+
+        // Temp, launcher controls should be moved to a seperate class
+        // feeds and launches from the flywheels (We should probabbly turn our laucher into it's own class)
         launch();
+        // sets the flywheel velocities
         leftFlywheel.setVelocity(targetVelocity);
         rightFlywheel.setVelocity(targetVelocity);
+
+        //localization
         pinpoint.update();
         Pose2D pos = pinpoint.getPosition();
 
+        //Telemetry
         telemetry.addData("X (in)", "%.1f", pos.getX(DistanceUnit.INCH));
         telemetry.addData("Y (in)", "%.1f", pos.getY(DistanceUnit.INCH));
         telemetry.addData("Heading (deg)", "%.1f", pos.getHeading(AngleUnit.DEGREES));
@@ -129,6 +152,7 @@ public class TeleOp extends OpMode {
 
     @Override
     public void stop() {
+        // makes sure the robot isn't moving at all when it stops
         leftFront.setPower(0);
         rightFront.setPower(0);
         leftBack.setPower(0);

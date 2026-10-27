@@ -53,7 +53,7 @@ public class MecanumTuner extends Procedure {
 
     private Direction testMotor(Wheel wheel, String displayName, String hardwareName) throws InterruptedException {
         final boolean[] correctMotor = new boolean[1];
-        final Direction[] direction = new Direction[1];
+         final Direction[] direction = new Direction[1];
 
         withDisplay(Display.fourWheelBot(wheel, false), () -> {
             runOpMode(new SpinMotor(displayName, hardwareName));
