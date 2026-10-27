@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
+import org.firstinspires.ftc.teamcode.driveclasses.MecanumDrive;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,6 +51,8 @@ public class DriverTest extends TeleOp {
     public Pose2D tempPose;
     public int totalPositions;
     public boolean newRun = false;
+    public MecanumDrive drive;
+    public float total;
 
     @Override
     public void init(){
@@ -59,6 +62,8 @@ public class DriverTest extends TeleOp {
         frontLeft = hardwareMap.get(DcMotorEx.class, "frontLeft");
         backRight = hardwareMap.get(DcMotorEx.class, "backRight");
         backLeft = hardwareMap.get(DcMotorEx.class, "backLeft");
+
+        drive = new MecanumDrive(frontRight, frontLeft, backRight, backLeft);
 
         // Hardware mapping the odometry and setting it up
         pinpoint = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
@@ -95,6 +100,11 @@ public class DriverTest extends TeleOp {
             telemetry.addData("Go to", coordinate);
         }
 
+        drive.drive(gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
+        if (gamepad1.left_stick_y != 0 || gamepad1.left_stick_x != 0 || gamepad1.right_stick_x != 0){
+            waitTimer.reset(); // Resets the timer if player moves
+        }
+
 
 
         // Checking odometry
@@ -117,6 +127,7 @@ public class DriverTest extends TeleOp {
     @Override
     public void stop(){
         double time = totalTimeTimer.seconds();
+        telemetry.addData("Average time", avg(timestamps));
         while(!gamepad1.left_bumper){
             telemetry.addData("Total Positions Reached", totalPositions);
             telemetry.addData("Final time: ", time);
@@ -126,5 +137,13 @@ public class DriverTest extends TeleOp {
     }
     boolean inRange(double target, double min, double max){
         return (target > min && target < max);
+    }
+
+    float avg(List<String> nums){
+        for (String num : nums){
+            float numm = Float.parseFloat(num);
+            total += numm;
+        }
+        return total;
     }
 }
