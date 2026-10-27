@@ -98,6 +98,7 @@ public class DriverTest extends OpMode {
     public void loop(){
         // Checking if a new position should be shown
         if(positionTimer.seconds() / 20 == 0 || newRun){
+            positionTimer.reset(); // Resets the timer
             newRun = false; // Resets the newRun variable
             int num = random.nextInt(6); // Gets the next random number
             coordinate = cords[num]; // Gets the next coordinate for the robot to go to
@@ -126,12 +127,20 @@ public class DriverTest extends OpMode {
             newRun = true;
         }
 
+        telemetry.update();
+
     }
 
     @Override
     public void stop(){
         double time = totalTimeTimer.seconds();
         telemetry.addData("Average time", avg(timestamps));
+
+        frontRight.setPower(0.00);
+        frontLeft.setPower(0.00);
+        backRight.setPower(0.00);
+        backLeft.setPower(0.00);
+
         while(!gamepad1.left_bumper){
             telemetry.addData("Total Positions Reached", totalPositions);
             telemetry.addData("Final time: ", time);
