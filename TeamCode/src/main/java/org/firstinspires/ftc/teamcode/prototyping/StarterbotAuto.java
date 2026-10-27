@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.prototyping;
 
+import static com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior.BRAKE;
+
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -20,6 +22,9 @@ public class StarterbotAuto extends OpMode {
     private DcMotor rightFrontDrive = null;
     private DcMotor rightBackDrive = null;
     private MecanumDrive mecanumDrive = null;
+
+    private ElapsedTime driveTimer = new ElapsedTime();
+    private double DRIVE_TIME = 2.5; // aproximation
 
     private DcMotorEx launcher = null;
 
@@ -68,6 +73,12 @@ public class StarterbotAuto extends OpMode {
         rightFrontDrive.setDirection(StarterbotTeleop.driveDirections[0]);
         leftBackDrive.setDirection(StarterbotTeleop.driveDirections[3]);
         rightBackDrive.setDirection(StarterbotTeleop.driveDirections[2]);
+
+        leftFrontDrive.setZeroPowerBehavior(BRAKE);
+        rightFrontDrive.setZeroPowerBehavior(BRAKE);
+        leftBackDrive.setZeroPowerBehavior(BRAKE);
+        rightBackDrive.setZeroPowerBehavior(BRAKE);
+        intake.setZeroPowerBehavior(BRAKE);
     }
 
     @Override
@@ -78,12 +89,22 @@ public class StarterbotAuto extends OpMode {
                 autoState = AutoStates.LAUNCHING;
             break;
             case LAUNCHING:
-                if (launch(false)) autoState = AutoStates.MOVE;
+                if (launch(false)) {
+                    driveTimer.reset();
+                    autoState = AutoStates.MOVE;
+                }
             break;
             case MOVE:
                 mecanumDrive.drive(1,0.4633431085,0); // This is the approximate values required to drive from our starting point, straight into the park zone
+                if (driveTimer.seconds() > DRIVE_TIME) {
+                    autoState = AutoStates.REST;
+                }
             break;
             case REST:
+                rightFrontDrive.setPower(0);
+                leftFrontDrive.setPower(0);
+                rightBackDrive.setPower(0);
+                leftBackDrive.setPower(0);
 
 
         }
@@ -91,6 +112,12 @@ public class StarterbotAuto extends OpMode {
 
     @Override
     public void stop() {
+
+        rightFrontDrive.setPower(0);
+        leftFrontDrive.setPower(0);
+        rightBackDrive.setPower(0);
+        leftBackDrive.setPower(0);
+
 
     }
 
