@@ -6,6 +6,8 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 public class DriverTest extends TeleOp {
 
@@ -19,6 +21,7 @@ public class DriverTest extends TeleOp {
     // Setting up the clocks
     public ElapsedTime totalTimeTimer = new ElapsedTime();
     public ElapsedTime positionTimer = new ElapsedTime();
+    public ElapsedTime waitTimer = new ElapsedTime();
 
     // Setting up the variables we will use for the hardware
     public DcMotorEx frontRight;
@@ -28,6 +31,8 @@ public class DriverTest extends TeleOp {
 
     // Setting up the pinpoint variables
     public GoBildaPinpointDriver pinpoint;
+
+    public List<String> timestamps = new ArrayList<>();
 
     // Creating the list for the random elements
     public double[][] cords = { // This creates a list of all the coordinates that the players can go to
@@ -44,6 +49,7 @@ public class DriverTest extends TeleOp {
     public double[] position;
     public Pose2D tempPose;
     public int totalPositions;
+    public boolean newRun = false;
 
     @Override
     public void init(){
@@ -82,9 +88,10 @@ public class DriverTest extends TeleOp {
     @Override
     public void loop(){
         // Checking if a new position should be shown
-        if(positionTimer.seconds() / 20 == 0){
-            int num = random.nextInt(6);
-            coordinate = cords[num];
+        if(positionTimer.seconds() / 20 == 0 || newRun){
+            newRun = false; // Resets the newRun variable
+            int num = random.nextInt(6); // Gets the next random number
+            coordinate = cords[num]; // Gets the next coordinate for the robot to go to
             telemetry.addData("Go to", coordinate);
         }
 
@@ -97,10 +104,12 @@ public class DriverTest extends TeleOp {
         double y = tempPose.getY(DistanceUnit.INCH);
         position[0] = x;
         position[1] = y;
-        
+
         // dw it works
-        if(inRange(position[0], coordinate[0]-5, coordinate[0]+5) && inRange(position[1], coordinate[1]-5, coordinate[1]+5)){
+        if(inRange(position[0], coordinate[0]-5, coordinate[0]+5) && inRange(position[1], coordinate[1]-5, coordinate[1]+5) && waitTimer.seconds() >= 2){
             totalPositions++;
+            timestamps.add(String.valueOf(totalTimeTimer.seconds()));
+            newRun = true;
         }
 
     }
