@@ -1,6 +1,8 @@
 package org.firstinspires.ftc.teamcode.prototyping;
 
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
@@ -10,7 +12,9 @@ import org.firstinspires.ftc.teamcode.driveclasses.MecanumDrive;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-public class DriverTest extends TeleOp {
+
+@TeleOp(name="DriverTest", group="testing")
+public class DriverTest extends OpMode {
 
     // Creating the new random object that will be used to generate random numbers
     public Random random = new Random();
