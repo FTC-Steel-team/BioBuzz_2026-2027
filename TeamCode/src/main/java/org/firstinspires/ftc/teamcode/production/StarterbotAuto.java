@@ -2,14 +2,18 @@ package org.firstinspires.ftc.teamcode.production;
 
 import static com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior.BRAKE;
 
+import com.pedropathing.api.Paths;
+import com.pedropathing.api.PoseFactory;
+import com.pedropathing.follower.Follower;
+import com.pedropathing.math.Pose;
+import com.pedropathing.paths.Path;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.util.ElapsedTime;
-
-import org.firstinspires.ftc.teamcode.driveclasses.MecanumDrive;
+import org.firstinspires.ftc.teamcode.pedro.Constants;
 
 @TeleOp(name = "StarterBot Teleop", group = "StarterBot")
 //@Disabled
@@ -20,14 +24,10 @@ public class StarterbotAuto extends OpMode {
     private DcMotor leftBackDrive = null;
     private DcMotor rightFrontDrive = null;
     private DcMotor rightBackDrive = null;
-    private MecanumDrive mecanumDrive = null;
-
-    private ElapsedTime driveTimer = new ElapsedTime();
-    private double DRIVE_TIME = 2.5; // aproximation
 
     private DcMotorEx launcher = null;
 
-    private final int LAUNCHER_TARGET_VELOCITY = 1250;
+    public final int LAUNCHER_TARGET_VELOCITY = 1250;
     public final int LAUNCHER_MIN_VELOCITY = 1200;
 
     private enum LauncherStates {
@@ -38,14 +38,21 @@ public class StarterbotAuto extends OpMode {
     }
     private LauncherStates launcherState = LauncherStates.IDLE;
 
-    private ElapsedTime shotTimer = new ElapsedTime();
-    private final double SHOT_TIME = 4.5;
+    private final ElapsedTime shotTimer = new ElapsedTime();
+    public final double SHOT_TIME = 4.5;
 
-
-    private DcMotor intake = null;
-    private CRServo leftIntakeServo = null;
-    private CRServo rightIntakeServo = null;
     private CRServo windmillServo = null;
+
+    public Follower follower; // Establishes the follower
+    private final PoseFactory poseFactory = PoseFactory.degrees(); // Making the poseFactory which is needed for pedro pathing
+
+    private final Pose start = poseFactory.of(55, 9, 90);
+    private final Pose path1 = poseFactory.of(9, 96, 90);
+    private final Pose path1Control1 = poseFactory.of(23, 15, 0);
+
+    public Path path1() {
+        return Paths.curve(start, path1Control1, path1).linear(start, path1);
+    }
 
     private enum AutoStates { // So this auto just launches, moves at the specific angle and then stops in the parking zone.
         LAUNCH,
@@ -62,11 +69,8 @@ public class StarterbotAuto extends OpMode {
         rightFrontDrive = hardwareMap.get(DcMotor.class, "right_front_drive");
         leftBackDrive = hardwareMap.get(DcMotor.class, "left_back_drive");
         rightBackDrive = hardwareMap.get(DcMotor.class, "right_back_drive");
-        intake = hardwareMap.get(DcMotor.class, "intake");
         launcher = hardwareMap.get(DcMotorEx.class, "launcher");
         windmillServo = hardwareMap.get(CRServo.class, "windmillServo");
-        leftIntakeServo = hardwareMap.get(CRServo.class, "left_intake_servo");
-        rightIntakeServo = hardwareMap.get(CRServo.class, "right_intake_servo");
 
         leftFrontDrive.setDirection(StarterbotTeleop.driveDirections[1]);
         rightFrontDrive.setDirection(StarterbotTeleop.driveDirections[0]);
@@ -77,7 +81,9 @@ public class StarterbotAuto extends OpMode {
         rightFrontDrive.setZeroPowerBehavior(BRAKE);
         leftBackDrive.setZeroPowerBehavior(BRAKE);
         rightBackDrive.setZeroPowerBehavior(BRAKE);
-        intake.setZeroPowerBehavior(BRAKE);
+
+        follower = Constants.create(hardwareMap);
+        follower.setPose(start);
     }
 
     @Override
@@ -89,13 +95,13 @@ public class StarterbotAuto extends OpMode {
             break;
             case LAUNCHING:
                 if (launch(false)) {
-                    driveTimer.reset();
                     autoState = AutoStates.MOVE;
+                    follower.follow(path1());
                 }
             break;
             case MOVE:
-                mecanumDrive.drive(1,0.4633431085,0); // This is the approximate values required to drive from our starting point, straight into the park zone
-                if (driveTimer.seconds() > DRIVE_TIME) {
+                follower.update();
+                if (!follower.isBusy()) {
                     autoState = AutoStates.REST;
                 }
             break;
