@@ -5,6 +5,8 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.util.ElapsedTime;
+
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.driveclasses.MecanumDrive;
@@ -51,7 +53,7 @@ public class DriverTest extends OpMode {
 
     // Making the active coordinate variable
     public double[] coordinate;
-    public double[] position;
+    public double[] position = new double[2];
     public Pose2D tempPose;
     public int totalPositions;
     public boolean newRun = false;
@@ -71,7 +73,14 @@ public class DriverTest extends OpMode {
 
         // Hardware mapping the odometry and setting it up
         pinpoint = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
+        pinpoint.setEncoderDirections(
+                GoBildaPinpointDriver.EncoderDirection.FORWARD,
+                GoBildaPinpointDriver.EncoderDirection.FORWARD
+        );
+        pinpoint.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
         pinpoint.setOffsets(0.00, 0.00, DistanceUnit.INCH);
+        pinpoint.setPosition(new Pose2D(DistanceUnit.INCH, 0, 0, AngleUnit.DEGREES, 0));
+
 
 
         // Getting the random setup for the driver test
@@ -92,6 +101,8 @@ public class DriverTest extends OpMode {
     public void start(){
         totalTimeTimer.reset();
         positionTimer.reset();
+        int num = random.nextInt(6);
+        coordinate = cords[num];
     }
 
     @Override
@@ -113,12 +124,10 @@ public class DriverTest extends OpMode {
 
 
         // Checking odometry
-        pinpoint.update(); // Updates the odometry's position
+        pinpoint.update();
         tempPose = pinpoint.getPosition();
-        double x = tempPose.getX(DistanceUnit.INCH);
-        double y = tempPose.getY(DistanceUnit.INCH);
-        position[0] = x;
-        position[1] = y;
+        position[0] = tempPose.getX(DistanceUnit.INCH);
+        position[1] = tempPose.getY(DistanceUnit.INCH);
 
         // dw it works
         if(inRange(position[0], coordinate[0]-5, coordinate[0]+5) && inRange(position[1], coordinate[1]-5, coordinate[1]+5) && waitTimer.seconds() >= 2){
@@ -127,6 +136,7 @@ public class DriverTest extends OpMode {
             newRun = true;
         }
 
+        telemetry.addData("Current Position", tempPose);
         telemetry.update();
 
     }
